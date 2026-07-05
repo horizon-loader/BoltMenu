@@ -4,14 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bolt Menu | Official</title>
-    <!-- Подключаем шрифты -->
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Иконки Lucide -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
             --bg-main: #0a0a0b;
-            --bg-card: rgba(18, 18, 20, 0.5);
+            --bg-card: rgba(18, 18, 20, 0.55);
             --text-main: #ffffff;
             --text-muted: #8e8e93;
             --border-radius: 12px;
@@ -48,36 +46,25 @@
             z-index: 1;
         }
 
-        /* Основной блок по центру */
+        /* Минималистичная карточка с описанием */
         .main-card {
             position: relative;
             z-index: 2;
             width: 100%;
-            max-width: 480px;
+            max-width: 440px;
             background: var(--bg-card);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            padding: 40px 32px;
+            padding: 36px 32px;
             border-radius: var(--border-radius);
             border: 1px solid rgba(255, 255, 255, 0.04);
             text-align: center;
             box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
-            animation: cardAppear 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .ascii-logo {
-            font-family: 'JetBrains Mono', monospace;
-            white-space: pre;
-            font-size: 0.75rem;
-            line-height: 1.2;
-            color: var(--text-main);
-            margin-bottom: 24px;
-            display: inline-block;
-            opacity: 0.9;
+            animation: cardAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         h1 {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 600;
             letter-spacing: -0.04em;
             margin-bottom: 12px;
@@ -87,10 +74,10 @@
             color: var(--text-muted);
             font-size: 0.95rem;
             line-height: 1.6;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
         }
 
-        /* Вертикальная стопка кнопок */
+        /* Вертикальные кнопки */
         .btn-stack {
             display: flex;
             flex-direction: column;
@@ -112,7 +99,7 @@
             border: 1px solid rgba(255, 255, 255, 0.03);
         }
 
-        /* Кнопка Скрипта (Акцентная белая) */
+        /* Кнопка получения ссылки */
         .btn-primary {
             background: var(--text-main);
             color: var(--bg-main);
@@ -123,7 +110,7 @@
             transform: translateY(-2px);
         }
 
-        /* Кнопка ТГ (Темная) */
+        /* Кнопка Телеграм */
         .btn-secondary {
             background: rgba(255, 255, 255, 0.03);
             color: var(--text-main);
@@ -135,11 +122,10 @@
             transform: translateY(-2px);
         }
 
-        /* Анимация карточки */
         @keyframes cardAppear {
             from {
                 opacity: 0;
-                transform: translateY(20px) scale(0.98);
+                transform: translateY(15px) scale(0.98);
             }
             to {
                 opacity: 1;
@@ -150,28 +136,17 @@
 </head>
 <body>
 
-    <!-- Фоновые нейроны -->
     <canvas id="neuron-canvas"></canvas>
 
-    <!-- Центрированный блок -->
     <div class="main-card">
-        <div class="ascii-logo">
- ____        _ _     __  __
-| __ )  ___ | | |_  |  \/  | ___ _ __  _   _
-|  _ \ / _ \| | __| | |\/| |/ _ \ '_ \| | | |
-| |_) | (_) | | |_  | |  | |  __/ | | | |_| |
-|____/ \___/|_|\__| |_|  |_|\___|_| |_|\__,_|</div>
-        
         <h1>Bolt Menu</h1>
         <p>Универсальный инструмент автоматизации. Оптимизированный код, стабильное исполнение и полный контроль игровой сессии.</p>
         
         <div class="btn-stack">
-       
             <a href="https://go.linkify.ru/2Im3" class="btn btn-primary">
                 <i data-lucide="code-2"></i> Получить скрипт
             </a>
             
-            <!-- Ссылка на телеграм проекта -->
             <a href="https://t.me/boltscript" target="_blank" class="btn btn-secondary">
                 <i data-lucide="send"></i> Telegram Проекта
             </a>
@@ -179,7 +154,6 @@
     </div>
 
     <script>
-        // Инициализация иконок
         lucide.createIcons();
 
         // --- СКРИПТ НЕЙРОННОЙ СЕТИ НА CANVAS ---
