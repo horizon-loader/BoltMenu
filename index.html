@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bolt Menu | Official Site</title>
+    <!-- Шрифт для интерфейса -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Иконки Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-main: #0a0a0b;
+            --bg-menu: #121214;
+            --bg-item: #1a1a1e;
+            --text-main: #ffffff;
+            --text-muted: #8e8e93;
+            --accent-white: #ffffff;
+            --accent-dark: #121214;
+            --border-radius: 12px;
+            --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Фоновый Canvas для нейронов */
+        #neuron-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: all; /* Чтобы реагировал на мышь */
+        }
+
+        /* Все элементы интерфейса поднимаем над фоном */
+        .content-wrapper {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 720px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: auto;
+        }
+
+        /* Описание и заголовки сайта */
+        .hero-section {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        .hero-section h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            letter-spacing: -0.05em;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .hero-section p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 24px;
+            max-width: 500px;
+            line-height: 1.5;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(18, 18, 20, 0.75);
+            backdrop-filter: blur(8px);
+            color: var(--text-main);
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .btn:hover {
+            background: var(--text-main);
+            color: var(--bg-main);
+            transform: translateY(-2px);
+        }
+
+        /* Контейнер Bolt Menu */
+        .bolt-menu-container {
+            width: 100%;
+            background-color: rgba(18, 18, 20, 0.9);
+            backdrop-filter: blur(12px);
+            border-radius: var(--border-radius);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            overflow: hidden;
+            animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Шапка меню (Табы) */
+        .menu-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .menu-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .menu-tabs {
+            display: flex;
+            gap: 4px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition-smooth);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+        }
+
+        .tab-btn.active {
+            background-color: var(--accent-white);
+            color: var(--accent-dark);
+        }
+
+        /* Контент вкладок */
+        .menu-content {
+            padding: 24px;
+            min-height: 380px;
+        }
+
+        .tab-panel {
+            display: none;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: var(--transition-smooth);
+        }
+
+        .tab-panel.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Строки элементов */
+        .row-item {
+            background: rgba(26, 26, 30, 0.6);
+            padding: 14px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.01);
+        }
+
+        .row-label {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .row-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bind-badge {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        /* Кастомный Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            transition: var(--transition-smooth);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--text-main);
+            border-radius: 50%;
+            transition: var(--transition-smooth);
+        }
+
+        input:checked + .slider {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Слайдеры диапазона */
+        .slider-container {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+
+        .slider-value {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+        }
+
+        .range-input {
+            width: 100%;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            height: 4px;
+            border-radius: 2px;
+            outline: none;
+        }
+
+        .range-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--text-main);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        /* Окно About */
+        .about-panel {
+            text-align: center;
+        }
+
+        .ascii-art {
+            font-family: 'JetBrains Mono', monospace;
+            white-space: pre;
+            font-size: 0.75rem;
+            line-height: 1.2;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .info-block {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .info-block a {
+            color: var(--text-main);
+            text-decoration: none;
+            border-bottom: 1px dashed var(--text-muted);
+        }
+
+        .changelog-box {
+            background: rgba(26, 26, 30, 0.6);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .changelog-title {
+            text-align: center;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+
+        .changelog-content {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Анимации появления интерфейса */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.97); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 640px) {
+            .menu-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+            .menu-tabs {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Холст для фонового эффекта нейронов -->
+    <canvas id="neuron-canvas"></canvas>
+
+    <div class="content-wrapper">
+        <!-- Описание Проекта -->
+        <section class="hero-section">
+            <h1>Bolt Menu</h1>
+            <p>Официальная веб-панель проекта. Сверхлегкое меню автоматизации и анализа игровых сред с оптимизированным ядром исполнения.</p>
+            <div class="btn-group">
+                <a href="https://t.me/boltscript" target="_blank" class="btn">
+                    <i data-lucide="send"></i> Telegram Канал
+                </a>
+                <button class="btn" onclick="copyScript()">
+                    <i data-lucide="copy"></i> Скопировать Скрипт
+                </button>
+            </div>
+        </section>
+
+        <!-- Интерактивное Меню (на основе скриншотов) -->
+        <div class="bolt-menu-container">
+            <div class="menu-header">
+                <div class="menu-title">Bolt Menu</div>
+                <div class="menu-tabs">
+                    <button class="tab-btn active" onclick="switchTab(event, 'combat')">Combat</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'visual')">Visual</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'misc')">Misc</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'fun')">Fun</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'settings')">Settings</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'about')">About</button>
+                </div>
+            </div>
+
+            <div class="menu-content">
+                <!-- COMBAT PANEL -->
+                <div id="combat" class="tab-panel active">
+                    <div class="row-item">
+                        <span class="row-label">Aimbot</span>
+                        <div class="row-controls">
+                            <span class="bind-badge">None</span>
+                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        </div>
+                    </div>
+                    <div class="row-item">
+                        <span class="row-label">RMB Bind (Right Click)</span>
+                        <div class="row-controls">
+                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        </div>
+                    </div>
+                    <div class="row-item">
+                        <span class="row-label">Wall Check</span>
+                        <div class="row-controls">
+                            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                        </div>
+                    </div>
+                    <div class="row-item">
+                        <span class="row-label">ForceField Check</span>
+                        <div class="row-controls">
+                            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                        </div>
+                    </div>
+                    <div class="row-item">
+                        <span class="row-label">Priority Mode</span>
+                        <div class="row-controls">
+                            <span class="bind-badge" style="background: rgba(255,255,255,0.08); color: #fff;">Crosshair</span>
+                        </div>
+                    </div>
+                    <div class="row-item slider-container">
+                        <div class="slider-header">
+                            <span>Aimbot FOV</span>
+                            <span class="slider-value" id="fov-val">18</span>
+                        </div>
+                        <input type="range" class="range-input" min="0" max="100" value="18" oninput="document.getElementById('fov-val').innerText = this.value">
+                    </div>
+                    <div class="row-item slider-container">
+                        <div class="slider-header">
+                            <span>Aimbot Smoothness</span>
+                            <span class="slider-value" id="smooth-val">10</span>
+                        </div>
+                        <input type="range" class="range-input" min="1" max="30" value="10" oninput="document.getElementById('smooth-val').innerText = this.value">
+                    </div>
+                </div>
+
+                <!-- VISUAL PANEL -->
+                <div id="visual" class="tab-panel">
+                    <div class="row-item">
+                        <span class="row-label">Enable ESP</span>
+                        <div class="row-controls"><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+                    </div>
+                    <div class="row-item">
+                        <span class="row-label">Box ESP</span>
+                        <div class="row-controls"><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+                    </div>
+                    <div class="row-item">
+                        <span class="row-label">Tracer Lines</span>
+                        <div class="row-controls"><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+                    </div>
+                </div>
+
+                <!-- MISC PANEL -->
+                <div id="misc" class="tab-panel">
+                    <div class="row-item">
+                        <span class="row-label">Invisible</span>
+                        <div class="row-controls"><span class="bind-badge">None</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+                    </div>
+                    <div class="row-item">
+                        <span class="row-label">Infinity Jump</span>
+                        <div class="row-controls"><span class="bind-badge">None</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+                    </div>
+                    <div class="row-item">
+                        <span class="row-label">Noclip</span>
+                        <div class="row-controls"><span class="bind-badge">None</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+                    </div>
+                    <div class="row-item">
+                        <span class="row-label">Fly</span>
+                        <div class="row-controls"><span class="bind-badge">None</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+                    </div>
+                    <div class="row-item">
+                        <span class="row-label">Enable WalkSpeed</span>
+                        <div class="row-controls"><span class="bind-badge">None</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+                    </div>
+                    <div class="row-item">
+                        <span class="row-label">Enable JumpPower</span>
+                        <div class="row-controls"><span class="bind-badge">None</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+                    </div>
+                </div>
+
+                <!-- FUN PANEL -->
+                <div id="fun" class="tab-panel">
+                    <div class="row-item" style="justify-content: center; color: var(--text-muted); font-size: 0.9rem;">
+                        Раздел находится в разработке
+                </div>
+            </div>
+
+                <!-- SETTINGS PANEL -->
+                <div id="settings" class="tab-panel">
+                    <div class="row-item">
+                        <span class="row-label">Save Configuration</span>
+                        <button class="bind-badge" style="border:none; cursor:pointer; background:rgba(255,255,255,0.1); color:#fff;">Save</button>
+                    </div>
+                    <div class="row-item">
+                        <span class="row-label">Streamproof Mode</span>
+                        <div class="row-controls"><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+                    </div>
+                </div>
+
+                <!-- ABOUT PANEL -->
+                <div id="about" class="tab-panel about-panel">
+                    <div class="ascii-art">
+ ____        _ _     __  __
+| __ )  ___ | | |_  |  \/  | ___ _ __  _   _
+|  _ \ / _ \| | __| | |\/| |/ _ \ '_ \| | | |
+| |_) | (_) | | |_  | |  | |  __/ | | | |_| |
+|____/ \___/|_|\__| |_|  |_|\___|_| |_|\__,_|</div>
+                    <div class="info-block">
+                        Version: v1.1<br>
+                        Created by @boltdeveloper<br>
+                        Telegram: <a href="https://t.me/boltscript" target="_blank">t.me/boltscript</a>
+                    </div>
+                    <div class="changelog-box">
+                        <div class="changelog-title">Changelog</div>
+                        <div class="changelog-content">No changelog</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Переключение табов
+        function switchTab(event, tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Копирование в буфер
+        function copyScript() {
+            const scriptCode = `loadstring(game:HttpGet("https://raw.githubusercontent.com/boltdeveloper/boltmenu/main/script.lua"))()`;
+            navigator.clipboard.writeText(scriptCode).then(() => {
+                alert('Скрипт скопирован!');
+            });
+        }
+
+        // --- ЛОГИКА ДВИЖЕНИЯ НЕЙРОНОВ (CANVAS) ---
+        const canvas = document.getElementById('neuron-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        const numParticles = 75; // Оптимальное количество для производительности
+        const particles = [];
+        const maxDistance = 120; // Дистанция связей между нейронами
+
+        let mouse = { x: null, y: null, radius: 150 };
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        window.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.6; // Медленное плавное движение
+                this.vy = (Math.random() - 0.5) * 0.6;
+                this.radius = Math.random() * 2 + 1.5;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Отскок от краев экрана
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+
+                // Интерактив с мышью (мягкое притяжение к курсору)
+                if (mouse.x !== null && mouse.y !== null) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < mouse.radius) {
+                        let force = (mouse.radius - dist) / mouse.radius;
+                        this.x += (dx / dist) * force * 0.4;
+                        this.y += (dy / dist) * force * 0.4;
+                    }
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+                ctx.fill();
+            }
+        }
+
+        // Создаем начальные точки
+        for (let i = 0; i < numParticles; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Обновляем и рисуем точки
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            // Просчитываем линии связи (аксоны нейронов)
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    let p1 = particles[i];
+                    let p2 = particles[j];
+                    let dx = p1.x - p2.x;
+                    let dy = p1.y - p2.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < maxDistance) {
+                        // Рассчитываем прозрачность линии в зависимости от расстояния
+                        let alpha = (maxDistance - dist) / maxDistance * 0.15;
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
